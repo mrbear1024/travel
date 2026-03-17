@@ -394,9 +394,225 @@ body {
   margin: 1rem 0;
 }
 
+/* ===== Tab Buttons ===== */
+.tab-btn {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 0.625rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #64748b;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  color: #334155;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.tab-btn.active {
+  background: white;
+  color: #2563eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== Map Styles ===== */
+#travel-map {
+  border-radius: 1rem;
+  z-index: 1;
+}
+
+.custom-marker {
+  background: none !important;
+  border: none !important;
+}
+
+.marker-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.marker-icon:hover {
+  transform: scale(1.2);
+}
+
+.marker-icon.checked {
+  filter: drop-shadow(0 2px 8px rgba(16, 185, 129, 0.5));
+}
+
+.marker-icon .marker-check {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  background: #10b981;
+  color: white;
+  font-size: 10px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  line-height: 1;
+}
+
+/* Map Popup */
+.map-popup {
+  min-width: 160px;
+  font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+}
+
+.map-popup .popup-header {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.map-popup .popup-icon {
+  font-size: 1.25rem;
+}
+
+.map-popup .popup-header strong {
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+
+.map-popup .popup-checked {
+  font-size: 0.7rem;
+  background: #d1fae5;
+  color: #065f46;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+}
+
+.map-popup .popup-desc {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0.25rem 0;
+}
+
+.map-popup .popup-day {
+  font-size: 0.75rem;
+  color: #3b82f6;
+  margin: 0.125rem 0;
+}
+
+.map-popup .popup-type {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  margin: 0.125rem 0;
+}
+
+/* ===== Location Cards ===== */
+.location-card {
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.location-card:hover {
+  border-color: #93c5fd;
+  background: #f0f7ff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.location-card.checked-in {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.location-type-badge {
+  font-size: 0.625rem;
+  padding: 0.0625rem 0.375rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.location-type-badge.city { background: #dbeafe; color: #1d4ed8; }
+.location-type-badge.scenic { background: #d1fae5; color: #065f46; }
+.location-type-badge.food { background: #fef3c7; color: #92400e; }
+.location-type-badge.hotel { background: #ede9fe; color: #5b21b6; }
+.location-type-badge.transport { background: #f1f5f9; color: #475569; }
+
+/* ===== Check-in Button ===== */
+.checkin-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 2px solid #e2e8f0;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.checkin-btn:hover {
+  border-color: #3b82f6;
+  transform: scale(1.1);
+}
+
+.checkin-btn.done {
+  border-color: #10b981;
+  background: #d1fae5;
+}
+
+.checkin-btn.done:hover {
+  border-color: #ef4444;
+  background: #fee2e2;
+}
+
+/* ===== Achievement Badge ===== */
+.achievement-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 0.5rem;
+  border-radius: 0.75rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.achievement-badge.unlocked {
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: #fbbf24;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.2);
+}
+
+.achievement-badge:not(.unlocked) span:first-child {
+  filter: grayscale(100%);
+  opacity: 0.4;
+}
+
 /* ===== Print Styles ===== */
 @media print {
-  header, footer, .step-item, .step-line, .btn-primary, .btn-secondary {
+  header, footer, .step-item, .step-line, .btn-primary, .btn-secondary, .tab-btn, #travel-map, .location-card, .checkin-btn, .achievement-badge {
     display: none !important;
   }
 

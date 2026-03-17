@@ -5,6 +5,7 @@ const fs = require('fs');
 const Anthropic = require('@anthropic-ai/sdk');
 const { buildQuestionnairePrompt } = require('./prompts/questionnaire');
 const { buildTravelPlanPrompt } = require('./prompts/travel-plan');
+const { buildLocationExtractionPrompt } = require('./prompts/locations');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -107,6 +108,41 @@ app.post('/api/travel-plan', async (req, res) => {
     if (!res.headersSent) {
       res.status(500).json({ error: '服务器错误，请稍后重试' });
     }
+  }
+});
+
+// POST /api/extract-locations - Extract locations from travel plan
+app.post('/api/extract-locations', async (req, res) => {
+  try {
+    const { planMarkdown } = req.body;
+    if (!planMarkdown || !planMarkdown.trim()) {
+      return res.status(400).json({ error: '缺少旅行计划内容' });
+    }
+
+    const prompt = buildLocationExtractionPrompt(planMarkdown.trim());
+
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4096,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const content = message.content[0].text;
+
+    let jsonStr = content;
+    const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      jsonStr = jsonMatch[1].trim();
+    }
+
+    const locations = JSON.parse(jsonStr);
+    res.json({ locations });
+  } catch (error) {
+    console.error('地点提取失败:', error);
+    if (error instanceof SyntaxError) {
+      return res.status(500).json({ error: 'AI 返回格式异常，请重试' });
+    }
+    res.status(500).json({ error: '服务器错误，请稍后重试' });
   }
 });
 
