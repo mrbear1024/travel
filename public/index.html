@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 旅行规划师 - 智能定制你的完美旅程</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans SC"', '"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', 'sans-serif'],
+          },
+          colors: {
+            primary: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' },
+            accent: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' },
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-amber-50 font-sans">
+  <div id="app">
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+      <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2 cursor-pointer" @click="resetAll">
+          <span class="text-2xl">🌍</span>
+          <h1 class="text-xl font-bold bg-gradient-to-r from-blue-600 to-amber-500 bg-clip-text text-transparent">
+            AI 旅行规划师
+          </h1>
+        </div>
+        <div v-if="step !== 'input'" class="text-sm text-gray-500 cursor-pointer hover:text-blue-600 transition" @click="resetAll">
+          重新开始
+        </div>
+      </div>
+    </header>
+
+    <!-- Step Indicator -->
+    <div class="max-w-5xl mx-auto px-4 pt-6 pb-2">
+      <div class="flex items-center justify-center gap-0">
+        <div class="step-item" :class="{ active: step === 'input', done: step !== 'input' }">
+          <div class="step-circle">1</div>
+          <span class="step-label">输入想法</span>
+        </div>
+        <div class="step-line" :class="{ active: step !== 'input' }"></div>
+        <div class="step-item" :class="{ active: step === 'questionnaire', done: step === 'plan' }">
+          <div class="step-circle">2</div>
+          <span class="step-label">完善信息</span>
+        </div>
+        <div class="step-line" :class="{ active: step === 'plan' }"></div>
+        <div class="step-item" :class="{ active: step === 'plan' }">
+          <div class="step-circle">3</div>
+          <span class="step-label">旅行计划</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 1: Input -->
+    <main class="max-w-5xl mx-auto px-4 py-8">
+      <transition name="fade" mode="out-in">
+
+        <!-- Input Step -->
+        <div v-if="step === 'input'" key="input" class="max-w-2xl mx-auto">
+          <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-3">你的下一段旅程，从这里开始</h2>
+            <p class="text-gray-500 text-lg">告诉我你的旅行想法，AI 将为你量身定制完美计划</p>
+          </div>
+          <div class="card">
+            <textarea
+              v-model="userInput"
+              class="w-full h-40 p-4 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-gray-700 placeholder-gray-400 text-base leading-relaxed"
+              placeholder="例如：我想带5岁的孩子从杭州出发自驾游，大约一周时间，预算1万左右，想去海边玩..."
+              @keydown.ctrl.enter="submitIdea"
+              @keydown.meta.enter="submitIdea"
+            ></textarea>
+            <div class="mt-4 flex items-center justify-between">
+              <span class="text-xs text-gray-400">Ctrl + Enter 快速提交</span>
+              <button
+                @click="submitIdea"
+                :disabled="!userInput.trim() || isLoading"
+                class="btn-primary"
+              >
+                <span v-if="isLoading" class="flex items-center gap-2">
+                  <span class="loading-spinner"></span>
+                  AI 正在分析...
+                </span>
+                <span v-else>开始规划 ✨</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Example Ideas -->
+          <div class="mt-6">
+            <p class="text-sm text-gray-400 mb-3 text-center">或者试试这些灵感：</p>
+            <div class="flex flex-wrap gap-2 justify-center">
+              <button
+                v-for="idea in exampleIdeas"
+                :key="idea"
+                @click="userInput = idea"
+                class="px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-full text-gray-600 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition"
+              >
+                {{ idea }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Questionnaire Step -->
+        <div v-else-if="step === 'questionnaire'" key="questionnaire" class="max-w-2xl mx-auto">
+          <div class="text-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">让我更了解你的需求</h2>
+            <p class="text-gray-500">回答以下问题，AI 将为你生成更精准的旅行计划</p>
+          </div>
+
+          <!-- User's original input -->
+          <div class="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
+            <div class="text-sm text-blue-600 font-medium mb-1">你的旅行想法</div>
+            <div class="text-gray-700">{{ userInput }}</div>
+          </div>
+
+          <div class="card">
+            <div class="space-y-6">
+              <div v-for="(q, idx) in questions" :key="q.id" class="question-item" :style="{ animationDelay: idx * 0.1 + 's' }">
+                <label class="block text-gray-700 font-medium mb-2">
+                  {{ q.label }}
+                </label>
+
+                <!-- Select -->
+                <select
+                  v-if="q.type === 'select'"
+                  v-model="answers[q.id]"
+                  class="form-input"
+                >
+                  <option value="" disabled>请选择...</option>
+                  <option v-for="opt in q.options" :key="opt" :value="opt">{{ opt }}</option>
+                </select>
+
+                <!-- Checkbox -->
+                <div v-else-if="q.type === 'checkbox'" class="flex flex-wrap gap-2">
+                  <label
+                    v-for="opt in q.options"
+                    :key="opt"
+                    class="checkbox-tag"
+                    :class="{ selected: (answers[q.id] || []).includes(opt) }"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="opt"
+                      v-model="answers[q.id]"
+                      class="hidden"
+                    >
+                    {{ opt }}
+                  </label>
+                </div>
+
+                <!-- Date Range -->
+                <div v-else-if="q.type === 'daterange'" class="flex items-center gap-3">
+                  <input
+                    type="date"
+                    v-model="answers[q.id + '_start']"
+                    class="form-input flex-1"
+                  >
+                  <span class="text-gray-400">至</span>
+                  <input
+                    type="date"
+                    v-model="answers[q.id + '_end']"
+                    class="form-input flex-1"
+                  >
+                </div>
+
+                <!-- Slider -->
+                <div v-else-if="q.type === 'slider'" class="space-y-2">
+                  <input
+                    type="range"
+                    v-model.number="answers[q.id]"
+                    :min="q.min"
+                    :max="q.max"
+                    :step="q.step || 1"
+                    class="w-full accent-blue-600"
+                  >
+                  <div class="flex justify-between text-sm text-gray-500">
+                    <span>{{ formatNumber(q.min) }}</span>
+                    <span class="text-blue-600 font-bold text-base">{{ formatNumber(answers[q.id] || q.min) }} 元</span>
+                    <span>{{ formatNumber(q.max) }}</span>
+                  </div>
+                </div>
+
+                <!-- Text -->
+                <input
+                  v-else
+                  v-model="answers[q.id]"
+                  type="text"
+                  class="form-input"
+                  :placeholder="q.placeholder || '请输入...'"
+                >
+              </div>
+            </div>
+
+            <div class="mt-8 flex items-center justify-between">
+              <button @click="step = 'input'" class="btn-secondary">
+                ← 返回修改
+              </button>
+              <button
+                @click="generatePlan"
+                :disabled="isLoading"
+                class="btn-primary"
+              >
+                <span v-if="isLoading" class="flex items-center gap-2">
+                  <span class="loading-spinner"></span>
+                  AI 正在规划...
+                </span>
+                <span v-else>生成旅行计划 🚀</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Plan Step -->
+        <div v-else-if="step === 'plan'" key="plan" class="max-w-4xl mx-auto">
+          <div v-if="isLoading && !planMarkdown" class="text-center py-16">
+            <div class="plan-loading-spinner"></div>
+            <p class="mt-4 text-gray-500 text-lg">AI 正在为你精心规划旅程...</p>
+            <p class="mt-2 text-gray-400 text-sm">这可能需要一点时间，请耐心等待</p>
+          </div>
+
+          <div v-if="planMarkdown">
+            <!-- Toolbar -->
+            <div class="flex items-center justify-between mb-4">
+              <div class="text-sm text-gray-400">
+                <span v-if="isLoading" class="flex items-center gap-2">
+                  <span class="loading-spinner"></span>
+                  正在生成中...
+                </span>
+                <span v-else>✅ 计划已生成完毕</span>
+              </div>
+              <div class="flex gap-2">
+                <button @click="step = 'questionnaire'" class="btn-secondary text-sm">
+                  修改需求
+                </button>
+                <button @click="resetAll" class="btn-secondary text-sm">
+                  重新规划
+                </button>
+                <button @click="printPlan" class="btn-primary text-sm">
+                  打印 / 导出 PDF
+                </button>
+              </div>
+            </div>
+
+            <!-- Markdown Content -->
+            <div class="card markdown-body" v-html="renderedPlan"></div>
+          </div>
+        </div>
+
+      </transition>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-8 text-sm text-gray-400">
+      <p>AI 旅行规划师 — 让每一段旅程都精彩</p>
+      <p class="mt-1">由 Claude AI 提供智能规划支持</p>
+    </footer>
+
+    <!-- Error Toast -->
+    <transition name="toast">
+      <div v-if="errorMsg" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-xl shadow-lg z-50">
+        {{ errorMsg }}
+      </div>
+    </transition>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
